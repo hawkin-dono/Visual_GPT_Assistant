@@ -81,29 +81,40 @@ class GPT_APIModel:
                     ]
         self.chat_history = [{
                             "role": "system",
-                            "content": "You are an intelligent and helpful assistant specializing in supporting operations at Denso Vietnam, a leading export manufacturing enterprise that supplies automotive components. Your primary role is to assist with factory operations, provide insights into production processes, help optimize workflows, and answer technical queries related to automotive parts manufacturing and assembly. Ensure your responses are clear, concise, and tailored to the needs of factory personnel." 
-                            },]
+                            "content": "You are an intelligent and helpful assistant specializing in supporting operations at Denso Vietnam, a leading export manufacturing enterprise that supplies automotive components. Your primary role is to assist with factory operations, provide insights into production processes, help optimize workflows, and answer technical queries related to machine, automotive parts manufacturing and assembly. Ensure your responses are clear, and tailored to the needs of factory personnel."                             },]
         if model_name is None:
             self.MODEL = 'ft:gpt-4o-2024-08-06:personal::AXT1Yomi'
             
         self.retrieval_model = RetrievalModel()
         
-    def encode_image(image_path):
+    def encode_image(self, image_path):
         with open(image_path, "rb") as image_file:
-            return f"data:image/png;base64,{encode_image(image_path)}" #base64.b64encode(image_file.read()).decode('utf-8')
+            return f"data:image/png;base64,{base64.b64encode(image_file.read()).decode('utf-8')}" #
     
-    def generate_response(self, prompt, image_link= None):
+    def generate_response(self, prompt, image_link= None, do_rag = True):
+        """ 
+        Generate a response from the model given a prompt. This function sends a request to the OpenAI API with the prompt and returns the response.
+        
+        Input:
+        - prompt: The prompt to generate the response from
+        - image_link: The link to the image to include in the prompt http or local path
+        - do_rag: Whether to use the RAG model to augment the prompt
+        """
         # update user prompt
         self.chat_history.append({
             "role": "user",
             "content": prompt
         })
         # add RAG queried information
-        try: 
-            query_prompt = self.retrieval_model.augment_query(prompt)
-        except Exception as e:
-            print("Error: ", e)
-            return 
+        if do_rag:
+            try: 
+                query_prompt = self.retrieval_model.augment_query(prompt)
+                print(query_prompt)
+            except Exception as e:
+                print("Error: ", e)
+                return 
+        else: 
+            query_prompt = prompt
             
         ## create message
         message = self.chat_history.copy()
@@ -112,7 +123,7 @@ class GPT_APIModel:
             "content": query_prompt
         })
         if image_link is not None:
-            if not image_link.startswith("data:image/png;base64"):
+            if image_link.startswith("data:image/png;base64"):
                 image = self.encode_image(image_link)
             else:
                 image = image_link
@@ -136,7 +147,7 @@ class GPT_APIModel:
     
         answer = self.process_response(prompt, response)
         
-        if len(self.chat_history) > 3:
+        if len(self.chat_history) > 5:
             self.reduce_context_length()
         
         return answer
@@ -187,7 +198,7 @@ class GPT_APIModel:
     
     def reduce_context_length(self, force_reduce= False):
         if force_reduce:
-            self.chat_history = [self.chat_history[0]] + self.chat_history[len(self.chat_history) - 2 :]
+            self.chat_history = [self.chat_history[0]] + self.chat_history[len(self.chat_history) - 2:]
         else:
             self.chat_history = [self.chat_history[0]] + self.chat_history[3:]
     
@@ -206,20 +217,30 @@ class GPT_APIModel:
         call_function = response.choices[0].message.tool_calls[0].function.name
         arguments = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
         function_call_result = handle_function_calling(call_function, arguments)
+        if (function_call_result is None) or (len(str(function_call_result)) <5):
+            function_call_result = "Không tìm thấy thông tin trong lịch sử lỗi và lịch sử bảo trì"
         function_call_result_message = {"role": "tool",
-                                "content": function_call_result,
+                                "content": str(function_call_result),
                                 "tool_call_id": response.choices[0].message.tool_calls[0].id}
         message = self.chat_history.copy()
         message.append(response.choices[0].message)
         message.append(function_call_result_message)
         
-        new_response = self.client.chat.completions.create(
-            model= self.MODEL,
-            messages= message,
-        )
+        try:
+            new_response = self.client.chat.completions.create(
+                model= self.MODEL,
+                messages= message,
+            )
+        except Exception as e:
+            print("Error: ", e)
+            print(response.choices[0].message)
+            print(function_call_result_message)
+            print(new_response.choices[0].message.content)
+            return e
+            
         
         self.chat_history.append({
-            "role": "assitant",
+            "role": "assistant",
             "content": new_response.choices[0].message.content
         })
         
@@ -232,6 +253,13 @@ class GPT_APIModel:
         
     def get_chat_history(self):
         return self.chat_history
+    
+    def reset_chat_history(self):
+        self.chat_history = [{
+                            "role": "system",
+                            "content": "You are an intelligent and helpful assistant specializing in supporting operations at Denso Vietnam, a leading export manufacturing enterprise that supplies automotive components. Your primary role is to assist with factory operations, provide insights into production processes, help optimize workflows, and answer technical queries related to automotive parts manufacturing and assembly. Ensure your responses are clear, concise, and tailored to the needs of factory personnel." 
+                            },]
+        
 
 
     

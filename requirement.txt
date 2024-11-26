@@ -1,0 +1,5 @@
+sentence_transformers
+pinecone
+openai
+pinecone-client
+lifelines

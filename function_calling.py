@@ -5,11 +5,11 @@ from src.model import train_model, predict
 
 
 
-def predict_repair_method(machine_name, machine_id, error_describe, maintain_df):
+def predict_repair_method(machine_name, machine_id, error_description, maintain_df):
     res = predict.finding_repair_method(
         machine_name= machine_name,
         machine_id= machine_id, 
-        error_describe= error_describe,
+        error_description= error_description,
         maintain_df= maintain_df,
     )
     return res
@@ -23,7 +23,7 @@ def predict_maintenance_and_failure(machine_number, model, threshold, df1, df2, 
     )
     return res
 def covariate_effects_on_machine(machine_number, model, df1, df2, used_categories):
-    res = predict.covariate_effects(
+    res = predict.covariate_effects_on_machine(
         machine_number=machine_number,
         model=model,
         df1=df1,
@@ -57,7 +57,7 @@ def handle_function_calling(func_name, args):
 # res = predict.finding_repair_method(
 #     machine_name= "OP4",
 #     machine_id= None, 
-#     error_describe= "roi dao",
+#     error_description= "roi dao",
 #     maintain_df= df2,
 # )
 # print(res)
