@@ -40,7 +40,7 @@ class RetrievalModel:
 def main():
     model = RetrievalModel()
     
-    text = "Cách thức bảo trì máy in"
+    text = "Lỗi rơi dao trong máy CNC"
     prompt = model.augment_query(text)
     print(prompt)
     
