@@ -1,7 +1,7 @@
 import pandas as pd
 
 import sys
-from src.model import train_model, predict
+from src.model import train_model, predict, get_statistic
 
 
 
@@ -47,9 +47,12 @@ def handle_function_calling(func_name, args):
     elif func_name == "recommend_maintenance":
         machine_id = args['machine_id']
         return predict_maintenance_and_failure(machine_number= machine_id, model=model, threshold=0.5, df1=df1, df2=df2, used_categories=used_categories)
-    elif func_name == "covariate_effects_on_machine":
-        machine_id = args['machine_id']
-        return covariate_effects_on_machine(machine_number= machine_id, model=model, df1=df1, df2=df2, used_categories=used_categories)
+    # elif func_name == "covariate_effects_on_machine":
+    #     machine_id = args['machine_id']
+    #     return covariate_effects_on_machine(machine_number= machine_id, model=model, df1=df1, df2=df2, used_categories=used_categories)
+    elif func_name == "common_causes_barchart_by_type":
+        machine_id = args['machine_name']
+        return get_statistic.common_causes_barchart_by_type(df2, machine_name, image_folder="figures")
     else:
         return 'Function name not found'
 

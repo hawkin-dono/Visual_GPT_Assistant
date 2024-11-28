@@ -160,7 +160,4 @@ def common_causes_barchart_by_type(df, machine_type, image_folder):
     
     
 
-    return {
-        "text": description_res,
-        "image": image_folder
-    }
+    return description_res
