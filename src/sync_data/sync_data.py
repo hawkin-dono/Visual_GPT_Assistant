@@ -114,4 +114,4 @@ if __name__ == "__main__":
     delete_entry(0)
     update_entry(1, {'Tên thiết bị': 'Thiết bị B'})
     save_csv()
-    process_file('maintain.csv')
+    process_file('data/maintain.csv')
