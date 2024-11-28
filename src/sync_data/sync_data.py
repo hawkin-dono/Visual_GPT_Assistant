@@ -78,7 +78,7 @@ def save_csv():
 
 # Hàm xử lý file đầu vào
 
-def process_file(file_path):
+def process_file(file_path: str = 'data/maintain.csv'):
     if file_path.endswith('.pdf'):
         # Xử lý file PDF - chỉ cập nhật Pinecone
         reader = PdfReader(file_path)
