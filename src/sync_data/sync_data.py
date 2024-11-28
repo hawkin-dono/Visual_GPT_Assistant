@@ -94,7 +94,7 @@ def process_file(file_path):
         for _, row in new_df.iterrows():
             add_entry(row)
         save_csv()
-
+        print("done")
 if __name__ == "__main__":
     new_entry = {
         'Trạng thái': 'Mới', 'Số chỉ thị': 123, 'Line': 'L1', 'Tên thiết bị': 'Thiết bị A',
@@ -114,4 +114,4 @@ if __name__ == "__main__":
     delete_entry(0)
     update_entry(1, {'Tên thiết bị': 'Thiết bị B'})
     save_csv()
-    process_file('maintain.csv')
+    process_file('data/maintain.csv')
