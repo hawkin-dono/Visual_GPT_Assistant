@@ -135,11 +135,14 @@ def common_causes_barchart_by_type(df, machine_type, image_folder):
     }
     """
     machine_data = df[df['Tên thiết bị'] == machine_type]
-
+    description_res = ""
     if machine_data.empty:
         raise ValueError(f"No data found for machine type {machine_type}")
 
     cause_counts = machine_data['Mã Nguyên nhân'].value_counts()
+    for i in cause_counts.index:
+        tmp = machine_data.loc[machine_data['Mã Nguyên nhân'] == i]['Nguyên nhân 1']
+        description_res += f"mã lỗi {i} tương đương với các nguyên nhân: {tmp.values} xuất hiện {cause_counts[i]} lần" + "\n"
 
     plt.figure(figsize=(10, 6))
     cause_counts.plot(kind='bar', color='skyblue', alpha=0.8)
@@ -154,7 +157,10 @@ def common_causes_barchart_by_type(df, machine_type, image_folder):
 
     plt.savefig(image_folder)
     plt.close()
+    
+    
 
     return {
-        'cause_frequency': cause_counts.to_dict()
+        "text": description_res,
+        "image": image_folder
     }

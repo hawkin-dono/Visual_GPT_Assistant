@@ -7,20 +7,10 @@ import json
 from ..utils import sample_process
 from ..utils.text_processing import normalizer, jaccard_similarity_2_shingle
 
-def get_description(df, column: list[str] = ["Tên thiết bị", "Số quản lý thiết bị", "Ngày phát sinh", "Nắm bắt hiện tượng", 
-                                             "Nguyên nhân 1", "Nguyên nhân 2", "Nguyên nhân gốc", "Xử lý", "Nội dung phòng chống tái phát"]):
-    """ 
-    return the description of the machine error
-    """
-    res = ""
-    for idx, row in df[column].iterrows():
-        res += f"Lỗi thứ {idx + 1}\n"
-        for col in column:
-            res += f"{col}: {row[col]}\n" if row[col] is not None else ""
-        res += "\n"
-    return res 
 
 def finding_repair_method(machine_name, machine_id, error_description, maintain_df: pd.DataFrame):
+    
+    
     """ 
     Question answerd: hãy cho tôi biết lỗi này lúc trc được giải quyết bằng cách nào 
     
@@ -42,6 +32,20 @@ def finding_repair_method(machine_name, machine_id, error_description, maintain_
     Idea: 
         - truy xuất thông tin lỗi trong dataframe
         """
+        
+    def get_description(df, column: list[str] = ["Tên thiết bị", "Số quản lý thiết bị", "Ngày phát sinh", "Nắm bắt hiện tượng", 
+                                             "Nguyên nhân 1", "Nguyên nhân 2", "Nguyên nhân gốc", "Xử lý", "Nội dung phòng chống tái phát"]):
+        """ 
+        return the description of the machine error
+        """
+        res = ""
+        for idx, row in df[column].iterrows():
+            res += f"Lỗi thứ {idx + 1}\n"
+            for col in column:
+                res += f"{col}: {row[col]}\n" if row[col] is not None else ""
+            res += "\n"
+        return res 
+
     machine_data = maintain_df[maintain_df['Tên thiết bị'] == machine_name] if machine_name is not None else maintain_df
     machine_data = maintain_df[maintain_df['Số quản lý thiết bị'] == machine_id ] if machine_id is not None else machine_data
     if machine_data.empty:
@@ -214,6 +218,9 @@ def predict_maintenance_and_failure(machine_number, model, threshold, df1, df2, 
         'recommended_time_date': '17-12-2024',
         'expected_failure_date': '06-11-2024'
     }"""
+    def get_discription(machine_number, expected_failure_date, recommended_maintenance_date):
+        return f"Máy {machine_number} được dự đoán có thể xảy ra sự cố vào ngày {predict_failure}.\n Hãy thực hiện bảo dưỡng vào ngày {predict_maintenance}" 
+
     
     predict_maintenance = recommend_maintenance(machine_number, model, threshold, df1, df2, used_categories)
     predict_failure = time_to_failure(machine_number, model, df1, df2, used_categories)
@@ -221,11 +228,13 @@ def predict_maintenance_and_failure(machine_number, model, threshold, df1, df2, 
     predict_maintenance = json.loads(predict_maintenance)
     predict_failure = json.loads(predict_failure)
     
-    return json.dumps({
-        "machine_number": machine_number,
-        "expected_failure_date": predict_failure['expected_failure_date'],
-        "recommended_maintenance_date": predict_maintenance['recommended_time_date'],
-    }, ensure_ascii=False)
+    
+    
+    try:
+        return get_discription(machine_number= machine_number, expected_failure_date = predict_failure['expected_failure_date'], 
+                               recommended_maintenance_date= predict_maintenance['recommended_time_date'])
+    except Exception as e:
+        return f"Không tìm thấy thông tin máy {machine_number}"
 
     
 def covariate_effects_on_machine(machine_number, model, df1, df2, used_categories):
@@ -297,3 +306,4 @@ def covariate_effects_on_machine(machine_number, model, df1, df2, used_categorie
         }, ensure_ascii=False)
     except Exception as e:
         return json.dumps({"error": str(e)})
+    

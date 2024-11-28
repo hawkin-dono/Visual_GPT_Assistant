@@ -58,24 +58,24 @@ class GPT_APIModel:
                                     }
                                 }
                         },  
-                        {
-                                "type": "function",
-                                "function": {
-                                            "name": "covariate_effects_on_machine",
-                                            "description": "Get machine id of the machine that need to find relations between machine's risks. Call this function when you need to recommend maintenance for a machine, If you do not know about the machine information, ask the user.",
-                                            "parameters": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "machine_id": {
-                                                        "type": "string",
-                                                        "description": "The id of the machine",
-                                                    },
-                                                },
-                                                        "required": ['machine_id'],
-                                                        "additionalProperties": False,
-                                                }
-                                            }
-                        },  
+                        # {
+                        #         "type": "function",
+                        #         "function": {
+                        #                     "name": "covariate_effects_on_machine",
+                        #                     "description": "Get machine id of the machine that need to find relations between machine's risks. Call this function when you need to recommend maintenance for a machine, If you do not know about the machine information, ask the user.",
+                        #                     "parameters": {
+                        #                         "type": "object",
+                        #                         "properties": {
+                        #                             "machine_id": {
+                        #                                 "type": "string",
+                        #                                 "description": "The id of the machine",
+                        #                             },
+                        #                         },
+                        #                                 "required": ['machine_id'],
+                        #                                 "additionalProperties": False,
+                        #                         }
+                        #                     }
+                        # },  
           
                 
                     ]
